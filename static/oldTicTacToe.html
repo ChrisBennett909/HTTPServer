@@ -3,21 +3,21 @@
 <html>
     <head>
         <title>Tic Tac Toe</title>
-        <link rel="stylesheet" type="text/css" href="static/styles/genericStyles.css">
-        <link rel="stylesheet" type="text/css" href="static/styles/TicTacToeStyles.css">
+        <link rel="stylesheet" type="text/css" href="/static/styles/genericStyles.css">
+        <link rel="stylesheet" type="text/css" href="/static/styles/TicTacToe.css">
     </head>
     <body>
         <div class="Container">
             <div class="Header">
-                <h1>Tic-Tac-Toe</h1>
+                <h1>Tic - Tac - Toe</h1>
             </div>
 
-            <div class="Header">
-                <h3 id="gamestatus">Current Player: X</h3>
+            <div class="header">
+                <h2 id="gameStatus">Current Player: X</h2>
                 <button id="reset-btn" class="reset-btn" style="display: none;">New Game</button>
             </div>
 
-            <div class="board">
+            <div class="board" >
                 <button class="cell" data-cell="0"></button>
                 <button class="cell" data-cell="1"></button>
                 <button class="cell" data-cell="2"></button>
@@ -31,5 +31,6 @@
                 <button class="cell" data-cell="8"></button>
             </div>
         </div>
+        <script src="/static/scripts/tempTicTacToe.js"></script>
     </body>
 </html>

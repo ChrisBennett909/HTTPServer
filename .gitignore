@@ -6,3 +6,4 @@
 *.sqlite
 *.sql
 *DBMaker.go
+Storage/

@@ -9,6 +9,7 @@ html, body
 {
     justify-self: flex-start;
 }
+
 .MenuContainer
 {
      display: flex; flex-flow: column nowrap;

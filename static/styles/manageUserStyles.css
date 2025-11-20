@@ -1,0 +1,8 @@
+
+.MenuContainer
+{
+    background-color: #1A1A1A;
+    border-radius: 4rem;
+    box-shadow: 4px 4px 8px #5A5A5A;
+    min-width: 30vw;
+}
