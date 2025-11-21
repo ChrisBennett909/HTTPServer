@@ -179,17 +179,36 @@ func session(w http.ResponseWriter, r *http.Request){
             }
         }
     }else if r.URL.Path == "/Cloud" {
-        tmplt, err := template.ParseFiles("static/storageSelection.html")
-        if err != nil{
-            http.Error(w, "1Cloud Menu Internal Error", http.StatusInternalServerError)
-            return
-        }
+        if r.Method == http.MethodGet{
+            tmplt, err := template.ParseFiles("static/storageSelection.html")
+            if err != nil{
+                http.Error(w, "1Cloud Menu Internal Error", http.StatusInternalServerError)
+                return
+            }
 
-        w.Header().Set("Content-type", "text/html")
-        folders := getStorageFolderNames();
-        err = tmplt.Execute(w, folders)
-        if err != nil{
-            http.Error(w, "2Cloud Menu Exectute Error", http.StatusInternalServerError)
+            w.Header().Set("Content-type", "text/html")
+            folders := getStorageFolderNames();
+            err = tmplt.Execute(w, folders)
+            if err != nil{
+                http.Error(w, "2Cloud Menu Exectute Error", http.StatusInternalServerError)
+                return
+            }
+        }else if r.Method == http.MethodPost{
+            //Get name of selected folder
+            //call folderLogin
+            //redirect to folder if true
+            r.ParseForm()
+            folder := r.FormValue("folder")
+
+            e*
+            http.SetCookie(w, &http.Cookie{
+                Name: "selectedFolder",
+                Value: folder,
+                Path: "/",
+            )}
+            */
+
+            //http.Redirect(w, r, "/", http.StatusSeeOther)
             return
         }
     }else if r.URL.Path == "/Cloud/Upload" {

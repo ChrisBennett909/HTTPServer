@@ -99,3 +99,34 @@ func addUserToDB(adminUsername, adminPassword, name, pass string, admin bool) bo
 
     return true;
 }
+
+func checkUserPassword(username string, password string) bool {
+    return false
+}
+func checkAdmin(user string) bool {
+    db, err := sql.Open("sqlite3", "./DB/credDB.db")
+    if err != nil{
+        fmt.Println("Failed to open database: ", err)
+        return false;
+    }
+    defer db.Close();
+
+    var isAdmin bool
+    queryString := "SELECT isAdmin FROM users WHERE username == ?"
+    query:= db.QueryRow(queryString, user).Scan(&isAdmin)
+
+    if query == sql.ErrNoRows{
+        fmt.Println("User does not exist")
+        return false 
+    }else if query != nil{
+        fmt.Println("Failed to query data")
+        return false
+    }else{
+        if isAdmin{
+            fmt.Println("Admin True")
+            return true
+        }
+    }
+
+    return false 
+}
