@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<title>Storage Selection</title>
+	<link rel="stylesheet" type="text/css" href="/static/styles/genericStyles.css">
+	<link rel="stylesheet" type="text/css" href="/static/styles/storageSelectionStyles.css">
+	</head>
+
+	<body>
+		<div class="Container">
+			<h1>Storage Selection</h1>
+			<div class="Folders">
+				{{range .}}
+				<a href="/Storage/{{.}}" class="FolderButton">{{.}}</a>
+				{{end}}
+			</div>
+		</div>
+	</body>
+</html>

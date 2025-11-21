@@ -7,6 +7,7 @@ import (
     "os"
     "path/filepath"
     "html/template"
+    "log"
 )
 
 
@@ -101,4 +102,23 @@ func DownloadHandler(storageFolder string) http.HandlerFunc {
             http.Error(w, "Error sending file", http.StatusInternalServerError)
         }
     }
+}
+
+func getStorageFolderNames() []string {
+    folderPath := "Storage"
+    entries, err := os.ReadDir(folderPath)
+
+    if err != nil {
+        log.Println("Error reading storage folder: ", err)
+        return nil
+    }
+
+    var folders[]string
+    for _, entry := range entries{
+        if entry.IsDir() {
+            folders = append(folders, entry.Name())
+        }
+    }
+
+    return folders
 }

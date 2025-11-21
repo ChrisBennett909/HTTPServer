@@ -179,14 +179,15 @@ func session(w http.ResponseWriter, r *http.Request){
             }
         }
     }else if r.URL.Path == "/Cloud" {
-        tmplt, err := template.ParseFiles("static/cloudMenu.html")
+        tmplt, err := template.ParseFiles("static/storageSelection.html")
         if err != nil{
             http.Error(w, "1Cloud Menu Internal Error", http.StatusInternalServerError)
             return
         }
 
         w.Header().Set("Content-type", "text/html")
-        err = tmplt.Execute(w, nil)
+        folders := getStorageFolderNames();
+        err = tmplt.Execute(w, folders)
         if err != nil{
             http.Error(w, "2Cloud Menu Exectute Error", http.StatusInternalServerError)
             return
