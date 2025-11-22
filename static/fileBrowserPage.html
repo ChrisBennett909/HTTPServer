@@ -9,15 +9,24 @@
 <body>
     <div class="Container">
         <div class="Header">
-        <h1>Uploaded Files</h1>
+            <h1>Folder: {{.FolderName}}</h1>
         </div>
+
+        {{if .UploadSuccess}}
+        <p class="success">File uploaded successfully</p>
+        {{end}}
+
+        <form action="/upload?folder={{.FolderName}}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <button type="submit">Upload</button>
+        </form>
 
         <div class="MenuContainer">
             <ul>
-                {{range .}}
+                {{range .Files}}
                     <li>
-                        <a href="/files/{{.}}">{{.}}</a>
-                        <a href="/Cloud/download?file={{.}}">Download</a>
+                        <a href="/files/{{$.FolderName}}/{{.}}">{{.}}</a>
+                        <a href="/Cloud/download?file={{$.FolderName}}/{{.}}">Download</a>
                     </li>
                 {{else}}
                     <li>No files uploaded yet.</li>

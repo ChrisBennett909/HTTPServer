@@ -2,6 +2,8 @@ package main
 
 import (
   "net/http"
+  "crypto/rand"
+  "encoding/hex"
   "fmt"
 )
 
@@ -11,67 +13,53 @@ func Login(w http.ResponseWriter, r *http.Request){
         r.ParseForm()
         username := r.FormValue("username")
         password := r.FormValue("password")
-        folder := r.FormValue("folder")
          
 
         if userPresent, _:= checkUser(username, string(password)); userPresent{
-             cookie := http.Cookie{
-                   Name: "session",
-                   Value: "loggedin", 
-                   Path: "/",
-                   HttpOnly: true,
-               }
-              http.SetCookie(w, &cookie)
-              if folder == nil{
-                http.Redirect(w, r, "/Home", http.StatusSeeOther)
-              }else if folder != nil{
-                //Redirect to folder cloud menu
-              }
-              return
+          token := generateToken()
+          storeSessionToken(username, token)
+
+          cookie := http.Cookie{
+                     Name: "session",
+                     Value: token,
+                     Path: "/",
+                     HttpOnly: false,
           }
-          http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
-       }
+          http.SetCookie(w, &cookie)
+
+          fmt.Println("User Present going ot home page")
+          http.Redirect(w, r, "/Home", http.StatusSeeOther)
+          return
+        }
+        http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
+    }
 }
 
-func storageLogin(w http.ResponseWriter, r *http.Request, rightUser string, nextPage string) bool {
-  //Check specific user 
-  /*
-  Get password
-  display login page and take username and password
-  if user is correct user or admin user return true
-  if not return false
-  */
-  r.ParseForm()
-  username := r.FormValue("username")
-  password := r.FormValue("password")
-  folder := r.FormValue("folder")
-
-  if _, isAdmin := checkUser(rightUser, string(password)); isAdmin{
-    return true
-  }
-
-  if username != rightUser{
-    fmt.Println("Wronge User for folder")
-    return false
-  }
-
-  if (checkUserPassword(username, password)){
-    return true
-  }
-
-  return false
-}
-
-func checkSingleUser(rightUser string, username string, password string) bool {
-  return false 
-}
 
 func RequireLogin(w http.ResponseWriter, r *http.Request) bool{
      cookie, err := r.Cookie("session")
-
-     if err != nil || cookie.Value != "loggedin"{
-         http.Redirect(w, r, "/", http.StatusSeeOther)
-         return false
+     if err != nil{
+       fmt.Println("User has no Cookie")
+       http.Redirect(w, r, "/", http.StatusSeeOther)
+       return false
      }
-     return true;
+
+     token := cookie.Value
+     if !checkSessionToken(token){
+       http.Redirect(w, r, "/", http.StatusSeeOther)
+       return false
+     }
+
+     return true
+}
+
+func generateToken() string{
+  b := make([]byte, 32)
+  _, err := rand.Read(b)
+  if err!= nil{
+    fmt.Println("Failed to generate token")
+    return ""
+  }
+
+  return hex.EncodeToString(b)
 }

@@ -19,9 +19,8 @@ html, body
      align-items: center;
      justify-content: center;
      margin: 5vw;
-     color: #FFFFF0;
+     color: #5A5A5A;
      #border: 2px outset #FFFFFF;
-     #background-color: #FFFFFF;
      z-index: 50;
 }
 .MenuContainer a

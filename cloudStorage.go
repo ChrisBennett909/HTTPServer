@@ -8,6 +8,7 @@ import (
     "path/filepath"
     "html/template"
     "log"
+    "strings"
 )
 
 
@@ -25,6 +26,12 @@ func UploadHandler(storageFolder string) http.HandlerFunc {
 
         r.ParseMultipartForm(10<<20) //10 MB max per file 
 
+        folder := r.URL.Query().Get("folder")
+        if folder == ""{
+            http.Error(w, "No folder specified", http.StatusBadRequest)
+            return
+        }
+
         file, handler, err := r.FormFile("file")
         if err != nil{
             http.Error(w, "Error reading file: "+err.Error(), http.StatusBadRequest)
@@ -32,7 +39,7 @@ func UploadHandler(storageFolder string) http.HandlerFunc {
         }
         defer file.Close()
 
-        dstPath := filepath.Join(storageFolder, handler.Filename)
+        dstPath := filepath.Join(storageFolder, folder, handler.Filename)
         dst, err := os.Create(dstPath)
         if err != nil {
             http.Error(w, "Unable to create file: "+err.Error(), http.StatusInternalServerError)
@@ -46,7 +53,8 @@ func UploadHandler(storageFolder string) http.HandlerFunc {
             return
         }
 
-        fmt.Fprintf(w, "File uploaded successfully: %s\n", handler.Filename)
+        //fmt.Fprintf(w, "File uploaded successfully: %s\n", handler.Filename)
+        http.Redirect(w, r, "/Cloud/Browse?folder="+folder+"&success=true", http.StatusSeeOther)
     }
 }
 
@@ -56,15 +64,35 @@ func FilesHandler(storageFolder string) http.Handler {
 
 func ListFilesHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        files, err := os.ReadDir(storageFolder)
+        folder := r.URL.Query().Get("folder")
+        if folder == ""{
+            http.Error(w, "No folder specified", http.StatusBadRequest)
+            return
+        }
+        folder = filepath.Clean(folder)
+        if folder == "." || strings.Contains(folder, ".."){
+            http.Error(w, "Invalid folder", http.StatusBadRequest)
+            return
+        }
+
+        files, err := os.ReadDir(filepath.Join(storageFolder, folder))
         if err!= nil {
             http.Error(w, "Unable to read cloud files", http.StatusInternalServerError)
             return
         }
 
-        var filenames []string
+        var fileNames []string
         for _, f:= range files {
-            filenames = append(filenames, f.Name())
+            fileNames = append(fileNames, f.Name())
+        }
+
+        uploadSuccess := r.URL.Query().Get("success") == "true"
+        
+
+        data := FolderPageData{
+            FolderName: folder,
+            Files: fileNames,
+            UploadSuccess: uploadSuccess,
         }
 
         tmplt, err := template.ParseFiles("static/fileBrowserPage.html")
@@ -74,7 +102,10 @@ func ListFilesHandler(storageFolder string) http.HandlerFunc {
         }
 
         w.Header().Set("Content-type", "text/html")
-        tmplt.Execute(w, filenames)
+        err = tmplt.Execute(w, data)
+        if err != nil{
+            log.Println("Template execution error: ", err)
+        }
     }
 }
 
@@ -86,6 +117,12 @@ func DownloadHandler(storageFolder string) http.HandlerFunc {
             return
         }
 
+        filename = filepath.Clean(filename)
+        if strings.Contains(filename, ".."){
+            http.Error(w, "Invalid file path", http.StatusBadRequest)
+            return
+        }
+
         filePath := filepath.Join(storageFolder, filename)
         file, err := os.Open(filePath)
         if err != nil{
@@ -94,7 +131,7 @@ func DownloadHandler(storageFolder string) http.HandlerFunc {
         }
         defer file.Close()
 
-        w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+        w.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(filename))
         w.Header().Set("Content-Type", "application/octet-stream")
 
         _, err = io.Copy(w, file)
@@ -104,21 +141,46 @@ func DownloadHandler(storageFolder string) http.HandlerFunc {
     }
 }
 
-func getStorageFolderNames() []string {
+func getStorageFolderNames(r *http.Request) []string {
     folderPath := "Storage"
     entries, err := os.ReadDir(folderPath)
 
     if err != nil {
         log.Println("Error reading storage folder: ", err)
-        return nil
+        return []string{}
     }
 
-    var folders[]string
+    var folders []string
     for _, entry := range entries{
         if entry.IsDir() {
             folders = append(folders, entry.Name())
         }
     }
 
-    return folders
+    cookie, err := r.Cookie("session")
+    if err != nil{
+        fmt.Println("User has no cookie")
+        return []string{}
+    }
+
+    token := cookie.Value
+    if checkAdmin(token){
+        return folders
+    }else{
+        username := getUsername(token)
+        if contains(folders, username){
+            return []string{username} 
+        }
+    }
+
+    return []string{}
+}
+
+func contains(slice []string, str string) bool{
+    for _, s := range slice{
+        if s == str{
+            return true
+        }
+    }
+    return false 
 }

@@ -100,10 +100,8 @@ func addUserToDB(adminUsername, adminPassword, name, pass string, admin bool) bo
     return true;
 }
 
-func checkUserPassword(username string, password string) bool {
-    return false
-}
-func checkAdmin(user string) bool {
+
+func checkAdmin(token string) bool {
     db, err := sql.Open("sqlite3", "./DB/credDB.db")
     if err != nil{
         fmt.Println("Failed to open database: ", err)
@@ -112,8 +110,8 @@ func checkAdmin(user string) bool {
     defer db.Close();
 
     var isAdmin bool
-    queryString := "SELECT isAdmin FROM users WHERE username == ?"
-    query:= db.QueryRow(queryString, user).Scan(&isAdmin)
+    queryString := "SELECT isAdmin FROM users WHERE sessionToken = ?"
+    query:= db.QueryRow(queryString, token).Scan(&isAdmin)
 
     if query == sql.ErrNoRows{
         fmt.Println("User does not exist")
@@ -129,4 +127,66 @@ func checkAdmin(user string) bool {
     }
 
     return false 
+}
+
+func storeSessionToken(username string, token string){
+    db, err := sql.Open("sqlite3", "./DB/credDB.db")
+    if err != nil{
+        fmt.Println("Failed to open database")
+        return
+    }
+    defer db.Close()
+
+    const queryString string = "UPDATE users SET sessionToken = ? WHERE username = ?"
+    _, err = db.Exec(queryString, token, username)
+    if err != nil{
+        fmt.Println("Failed to store new session token")
+        return 
+    }
+}
+
+func checkSessionToken(token string) bool {
+    db, err := sql.Open("sqlite3", "./DB/credDB.db")
+    if err != nil{
+        fmt.Println("Failed to open database: ", err)
+        return false
+    }
+    defer db.Close()
+
+    var storedToken string
+    const queryString string = "SELECT sessionToken FROM users WHERE sessionToken = ?"
+    err = db.QueryRow(queryString, token).Scan(&storedToken)
+
+    if err == sql.ErrNoRows{
+        fmt.Println("Failed to find session")
+        return false 
+    }else if err != nil{
+        fmt.Println("Failed to query data")
+        return false
+    }
+
+    return true
+}
+
+func getUsername(token string) string{
+    db, err := sql.Open("sqlite3)", "./DB/credDB.db")
+    if err != nil{
+        fmt.Println("Failed to open database")
+        return ""
+    }
+    defer db.Close()
+
+    var username string = ""
+    queryString := "SELECT username FROM users WHERE sessionToken = ?"
+    err = db.QueryRow(queryString, token).Scan(&username)
+
+    if err == sql.ErrNoRows{
+        fmt.Println("No user found with that token")
+        return username
+    }else if err != nil{
+        fmt.Println("Failed to get username")
+        return username
+    }
+
+    return username 
 }

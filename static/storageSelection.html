@@ -13,7 +13,9 @@
 				{{range .}}
 				<form method="POST" action="/Cloud" style="display:inline">
 					<input type="hidden" name="folder" value="{{.}}">
-					<button type="submit" class="FolderButton">{{.}}</button>
+					<button formAction="/Cloud/Browse?folder={{.}}" class="FolderButton">
+						{{.}}
+					</button>
 				</form>
 				{{end}}
 			</div>

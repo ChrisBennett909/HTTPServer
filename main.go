@@ -8,6 +8,12 @@ import
     "html/template"
 )
 
+type FolderPageData struct {
+    FolderName string
+    Files []string
+    UploadSuccess bool 
+}
+
 func session(w http.ResponseWriter, r *http.Request){
     if r.URL.Path == "/Hello"{
         w.Header().Set("Content-Type", "text/html")
@@ -187,28 +193,16 @@ func session(w http.ResponseWriter, r *http.Request){
             }
 
             w.Header().Set("Content-type", "text/html")
-            folders := getStorageFolderNames();
+            folders := getStorageFolderNames(r);
             err = tmplt.Execute(w, folders)
             if err != nil{
                 http.Error(w, "2Cloud Menu Exectute Error", http.StatusInternalServerError)
                 return
             }
         }else if r.Method == http.MethodPost{
-            //Get name of selected folder
-            //call folderLogin
-            //redirect to folder if true
+            //get folder name clicked and pass that to function to display 
             r.ParseForm()
-            folder := r.FormValue("folder")
-
-            e*
-            http.SetCookie(w, &http.Cookie{
-                Name: "selectedFolder",
-                Value: folder,
-                Path: "/",
-            )}
-            */
-
-            //http.Redirect(w, r, "/", http.StatusSeeOther)
+            //folder := r.FormValue("folder")
             return
         }
     }else if r.URL.Path == "/Cloud/Upload" {
@@ -237,9 +231,9 @@ func main(){
         panic(err)
     }
 
-    http.HandleFunc("/upload", UploadHandler(storageFolder))
     http.Handle("/files/", FilesHandler(storageFolder))
-    http.HandleFunc("/Cloud/browse", ListFilesHandler(storageFolder))
+    http.Handle("/Cloud/Browse", ListFilesHandler(storageFolder))
+    http.Handle("/upload", UploadHandler(storageFolder))
     http.HandleFunc("/Cloud/download", DownloadHandler(storageFolder))
 
     http.HandleFunc("/", session)
