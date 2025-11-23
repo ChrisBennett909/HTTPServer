@@ -168,6 +168,7 @@ func getStorageFolderNames(r *http.Request) []string {
         return folders
     }else{
         username := getUsername(token)
+	fmt.Println("Folder Name should be: ", username)
         if contains(folders, username){
             return []string{username} 
         }
@@ -179,8 +180,10 @@ func getStorageFolderNames(r *http.Request) []string {
 func contains(slice []string, str string) bool{
     for _, s := range slice{
         if s == str{
+	    fmt.Println("User Folder Found: ", s)
             return true
         }
     }
+    fmt.Println("Storage folder does not have User Folder: ", str)
     return false 
 }

@@ -169,7 +169,8 @@ func checkSessionToken(token string) bool {
 }
 
 func getUsername(token string) string{
-    db, err := sql.Open("sqlite3)", "./DB/credDB.db")
+    fmt.Println("Getting Username")
+    db, err := sql.Open("sqlite3", "./DB/credDB.db")
     if err != nil{
         fmt.Println("Failed to open database")
         return ""
