@@ -235,6 +235,7 @@ func main(){
     http.Handle("/Cloud/Browse", ListFilesHandler(storageFolder))
     http.Handle("/upload", UploadHandler(storageFolder))
     http.HandleFunc("/Cloud/download", DownloadHandler(storageFolder))
+    http.HandleFunc("/Cloud/delete", DeleteFileHandler(storageFolder))
 
     http.HandleFunc("/", session)
     fmt.Println("Listening on Port: 8080")

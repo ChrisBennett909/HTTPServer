@@ -16,6 +16,41 @@ func InitStorage(folder string) error {
     return os.MkdirAll(folder, os.ModePerm)
 }
 
+func DeleteFileHandler(storageFolder string) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request){
+        if r.Method != http.MethodPost {
+            http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+            return
+        }
+
+        filePath := r.FormValue("file")
+        
+        if filePath == ""{
+            http.Error(w, "No File Selected", http.StatusBadRequest)
+            return 
+        }
+
+        cleanPath := filepath.Clean(filePath)
+
+        if strings.Contains(cleanPath, ".."){
+            http.Error(w, "Invalid Path", http.StatusBadRequest)
+            return 
+        }
+
+        fullPath := filepath.Join(storageFolder, cleanPath)
+
+        err := os.Remove(fullPath)
+        if err != nil {
+            http.Error(w, "Failed to delete file", http.StatusInternalServerError)
+            return
+        }
+
+        folder := strings.Split(cleanPath, string(os.PathSeparator))[0]
+
+        http.Redirect(w, r, "/Cloud?folder="+folder, http.StatusSeeOther)
+    }
+}
+
 func UploadHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         if r.Method != http.MethodPost {
