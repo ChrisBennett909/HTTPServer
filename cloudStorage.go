@@ -99,6 +99,7 @@ func FilesHandler(storageFolder string) http.Handler {
 
 func ListFilesHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
+        fmt.Println("Listing Files")
         folder := r.URL.Query().Get("folder")
         if folder == ""{
             http.Error(w, "No folder specified", http.StatusBadRequest)
@@ -107,6 +108,20 @@ func ListFilesHandler(storageFolder string) http.HandlerFunc {
         folder = filepath.Clean(folder)
         if folder == "." || strings.Contains(folder, ".."){
             http.Error(w, "Invalid folder", http.StatusBadRequest)
+            return
+        }
+
+        fullPath := filepath.Join(storageFolder, folder)
+
+        info, err := os.Stat(fullPath)
+        if err != nil{
+            http.Error(w, "Not Found", http.StatusNotFound)
+            return
+        }
+
+        if !info.IsDir(){
+            http.ServeFile(w, r, fullPath)
+            fmt.Println("File Served")
             return
         }
 
