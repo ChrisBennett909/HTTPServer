@@ -15,6 +15,8 @@ type FolderPageData struct {
 }
 
 func session(w http.ResponseWriter, r *http.Request){
+    //if !RequireLogin(w, r) return
+
     if r.URL.Path == "/Hello"{
         w.Header().Set("Content-Type", "text/html")
         tmplt, err := template.ParseFiles("static/hello.html")
@@ -50,6 +52,7 @@ func session(w http.ResponseWriter, r *http.Request){
             if !RequireLogin(w, r){
                 return 
             }
+
             tmplt, err := template.ParseFiles("static/addUser.html")
             if err != nil{
                 http.Error(w, "1Internal Error", http.StatusInternalServerError)
@@ -99,6 +102,10 @@ func session(w http.ResponseWriter, r *http.Request){
             return
         }
     }else if r.URL.Path == "/Calc"{
+        if !RequireLogin(w, r){
+            return 
+        }
+
         if  validUser := RequireLogin(w, r); !validUser {
             fmt.Println(validUser)
             return
@@ -117,9 +124,7 @@ func session(w http.ResponseWriter, r *http.Request){
                 http.Error(w, "2Internal Server Error", http.StatusInternalServerError)
             }
         }else if r.Method == http.MethodPost{
-            if !RequireLogin(w, r){
-                return 
-            }
+            if !RequireLogin(w, r){ return}
 
             r.ParseForm()
             num1 := r.FormValue("num1")
@@ -185,6 +190,9 @@ func session(w http.ResponseWriter, r *http.Request){
             }
         }
     }else if r.URL.Path == "/Cloud" {
+        if !RequireLogin(w,r) {
+            return 
+        }
         if r.Method == http.MethodGet{
             tmplt, err := template.ParseFiles("static/storageSelection.html")
             if err != nil{
@@ -200,12 +208,19 @@ func session(w http.ResponseWriter, r *http.Request){
                 return
             }
         }else if r.Method == http.MethodPost{
+            if !RequireLogin(w,r){
+                return 
+            }
             //get folder name clicked and pass that to function to display 
             r.ParseForm()
             //folder := r.FormValue("folder")
             return
         }
     }else if r.URL.Path == "/Cloud/Upload" {
+        if !RequireLogin(w,r){
+            return 
+        }
+
         tmplt, err := template.ParseFiles("static/uploadPage.html")
         if err != nil {
             http.Error(w, "Failed opening upload page", http.StatusInternalServerError)

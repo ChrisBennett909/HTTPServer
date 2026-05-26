@@ -27,7 +27,7 @@ func Login(w http.ResponseWriter, r *http.Request){
           }
           http.SetCookie(w, &cookie)
 
-          fmt.Println("User Present going ot home page")
+          fmt.Println("User Present going to home page")
           http.Redirect(w, r, "/Home", http.StatusSeeOther)
           return
         }

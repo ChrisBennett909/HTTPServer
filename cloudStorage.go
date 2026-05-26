@@ -18,6 +18,10 @@ func InitStorage(folder string) error {
 
 func DeleteFileHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request){
+        if !RequireLogin(w, r){
+            return
+        }
+
         if r.Method != http.MethodPost {
             http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
             return
@@ -53,6 +57,10 @@ func DeleteFileHandler(storageFolder string) http.HandlerFunc {
 
 func UploadHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
+        if !RequireLogin(w, r){
+            return
+        }
+
         if r.Method != http.MethodPost {
             w.WriteHeader(http.StatusMethodNotAllowed)
             fmt.Fprintf(w, "Only POST requests are allowed")
@@ -93,12 +101,23 @@ func UploadHandler(storageFolder string) http.HandlerFunc {
     }
 }
 
-func FilesHandler(storageFolder string) http.Handler {
-    return http.StripPrefix("/files/", http.FileServer(http.Dir(storageFolder)))
+func FilesHandler(storageFolder string) http.HandlerFunc {
+    fileHandler := http.StripPrefix("/files/", http.FileServer(http.Dir(storageFolder)))
+
+    return func(w http.ResponseWriter, r *http.Request){
+        if !RequireLogin(w,r){
+            return
+        }
+        fileHandler.ServeHTTP(w,r)
+    }
 }
 
 func ListFilesHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
+        if !RequireLogin(w, r){
+            return
+        }
+
         fmt.Println("Listing Files")
         folder := r.URL.Query().Get("folder")
         if folder == ""{
@@ -161,6 +180,10 @@ func ListFilesHandler(storageFolder string) http.HandlerFunc {
 
 func DownloadHandler(storageFolder string) http.HandlerFunc {
     return func(w http.ResponseWriter, r* http.Request){
+        if !RequireLogin(w, r){
+            return 
+        }
+
         filename := r.URL.Query().Get("file")
         if filename == ""{
             http.Error(w, "Missing File", http.StatusBadRequest)
