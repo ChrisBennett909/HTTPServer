@@ -259,7 +259,14 @@ func main(){
     fs := http.FileServer(http.Dir("static"))
     http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+    /*
+    Unccoment when using own HTTPS and TLS 
     if err := http.ListenAndServeTLS(":8080", "Cert/server.crt", "Cert/server.key",  nil); err != nil {
+        fmt.Println("Server Failed", err)
+    }
+    */
+
+    if err := http.ListenAndServe(":8080", http.HandlerFunc(session)); err != nil{
         fmt.Println("Server Failed", err)
     }
 }

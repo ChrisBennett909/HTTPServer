@@ -33,7 +33,7 @@ html, body
      display: flex; flex-flow: column nowrap;
      position: absolute;
      aspect-ratio: 1/1;
-     width: 20vw;
+     width: 40vw;
      align-items: center;
      justify-content: center;
      border-radius: 50%;
