@@ -16,6 +16,7 @@ type FolderPageData struct {
 
 func session(w http.ResponseWriter, r *http.Request){
     //if !RequireLogin(w, r) return
+    fmt.Println("In Session")
 
     if r.URL.Path == "/Hello"{
         w.Header().Set("Content-Type", "text/html")
@@ -37,6 +38,7 @@ func session(w http.ResponseWriter, r *http.Request){
             http.Error(w, "1Internal Error", http.StatusInternalServerError)
             return
         }
+        fmt.Println("parsed file login.html")
 
         w.Header().Set("Content-Type", "text/html; charset=utf-8")
         err = tmplt.Execute(w, nil)
@@ -46,6 +48,7 @@ func session(w http.ResponseWriter, r *http.Request){
         }
     }else if r.Method == http.MethodPost {
         Login(w, r)
+        fmt.Println("Login function done")
     }
     }else if r.URL.Path == "/AddUser"{
         if r.Method == http.MethodGet{
