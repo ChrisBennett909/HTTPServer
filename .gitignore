@@ -7,4 +7,9 @@
 *.sql
 *DBMaker.go
 *.e
+Empire
+EmpireT
+SMaster
+SMasterT
+
 Storage/
