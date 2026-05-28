@@ -255,8 +255,9 @@ func main(){
     http.HandleFunc("/Cloud/download", DownloadHandler(storageFolder))
     http.HandleFunc("/Cloud/delete", DeleteFileHandler(storageFolder))
 
-    http.HandleFunc("/", session)
     fmt.Println("Listening on Port: 8080")
+
+    http.HandleFunc("/", session)
 
     //Enable File server
     fs := http.FileServer(http.Dir("static"))
@@ -269,7 +270,7 @@ func main(){
     }
     */
 
-    if err := http.ListenAndServe(":8080", http.HandlerFunc(session)); err != nil{
+    if err := http.ListenAndServe(":8080", nil); err != nil{
         fmt.Println("Server Failed", err)
     }
 }
