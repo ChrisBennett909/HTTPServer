@@ -1,3 +1,16 @@
-
 HTTP server in GO with calculator and more to come 
+
+Make sure the .service file is in the right directory 
+For POP! OS and most other Ubuntu Server Distros that would be /etc/systemd/system/empire.service
+
+run this from the HTTPServer directory 
+cp empire.service ~/etc/systemd/system/empire.service
+
+sudo systemctl daemon-reload 
+sudo systemctl enable empire
+sudo systemctl start empire
+systemctl status empire
+
+
+This should work fine off the bat but if not read the output from the last command.
 
